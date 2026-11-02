@@ -1,8 +1,10 @@
 import numpy as np
 from pathlib import Path
+from common import Settings,get_settings
+#Height, Width , Depth(Dimension)
 
-#Height, Weight , Depth(Dimension)
-H,W,D=20,20,64
+settings=get_settings()
+H,W,D= settings.H,settings.W,settings.D
 SEED=0
 
 
@@ -16,7 +18,7 @@ def make_stub(path="data/embeddings_stub.npy"):
 
 def get_embeddings(path="data/embeddings_stub.npy"):
     emb= np.load(path)
-    #vertify data shape and type
+    #verify data shape and type
     assert emb.shape == (H,W,D) and emb.dtype== np.float32
     return emb
 
