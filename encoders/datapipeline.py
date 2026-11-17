@@ -6,9 +6,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset
-from torchvision.datasets.eurosat import EuroSAT
-from torchvision.transforms import transforms
-from common import Settings, get_settings
+from common import get_settings
 from .city_tiles import make_synthetic_city
 
 
@@ -62,14 +60,20 @@ class NormalizedTiles(Dataset):
 # Loading raw arrays
 # ----------------------------------------------------------------------------
 def load_eurosat_arrays(root: str = "data/eurosat", download: bool = True):
+    cache = Path(root).parent / "eurosat_cache.npz"
+    if cache.exists():
+        d = np.load(cache)
+        assert list(d["classes"]) == settings.EUROSAT_CLASSES, "class order changed; delete the cache"
+        return d["images"].astype(np.float32) / 255.0, d["labels"]
+
     from torchvision import datasets, transforms
-    
     ds = datasets.EuroSAT(root=root, download=download, transform=transforms.ToTensor())
     assert list(ds.classes) == settings.EUROSAT_CLASSES, "class order changed; update city_tiles.py"
     images = np.stack([ds[i][0].numpy() for i in range(len(ds))]).astype(np.float32)
     labels = np.array(ds.targets, dtype=np.int64)
+    np.savez(cache, images=np.rint(images * 255).astype(np.uint8),
+             labels=labels, classes=np.array(ds.classes))
     return images, labels
-
 
 def load_synthetic_arrays(n_cities: int = 8, seed: int = 0):
     """Many small synthetic cities flattened into one tile pool. Labels = land-use id."""

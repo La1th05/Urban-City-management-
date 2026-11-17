@@ -38,6 +38,8 @@ EUROSAT_TO_LAND_USE = {
     "Residential": (RES, False), "Highway": (MIX, False),
     "River": (None, True), "SeaLake": (None, True),
 }
+COMMERCIAL_PROXY = ("Industrial",)
+
 
 def cell_to_pixel_box(i: int, j: int, tile: int = settings.T):
     """Return (row_start, row_end, col_start, col_end) of cell (i, j)."""
@@ -120,15 +122,18 @@ def compose_city_from_eurosat(images: np.ndarray, labels: np.ndarray,
 
     images : [N, 3, 64, 64] float32 in [0, 1]    labels : [N] EuroSAT label ids
     land_use, water : the [h, w] maps from make_land_use_map (or your own).
-    Returns tiles [h, w, 3, 64, 64]. Real imagery, known ground-truth land use.
+    Returns tiles [h, w, 3, 64, 64]. Commercial cells use COMMERCIAL_PROXY patches.
     """
     rng = np.random.default_rng(seed)
-    by_target = {}  # (land_use or "water") -> indices of matching EuroSAT patches
+    by_target = {}  # (land_use or "water") -> EuroSAT class indices
     for idx, name in enumerate(settings.EUROSAT_CLASSES):
         lu, is_water = EUROSAT_TO_LAND_USE[name]
         key = "water" if is_water else lu
         by_target.setdefault(key, []).append(idx)
     pools = {k: np.flatnonzero(np.isin(labels, v)) for k, v in by_target.items()}
+
+    proxy_idx = [settings.EUROSAT_CLASSES.index(n) for n in COMMERCIAL_PROXY]
+    proxy_pool = np.flatnonzero(np.isin(labels, proxy_idx))
 
     h, w = land_use.shape
     tiles = np.zeros((h, w) + images.shape[1:], dtype=np.float32)
@@ -136,7 +141,9 @@ def compose_city_from_eurosat(images: np.ndarray, labels: np.ndarray,
         for j in range(w):
             key = "water" if water[i, j] else int(land_use[i, j])
             pool = pools.get(key)
-            if pool is None or len(pool) == 0:  # e.g. commercial: no EuroSAT equivalent
-                pool = pools[MIX]               # fall back to urban-fabric patches
+            if pool is None or len(pool) == 0:
+                pool = proxy_pool if key == COM else pools[MIX]
             tiles[i, j] = images[rng.choice(pool)]
+
+    assert tiles.reshape(h * w, -1).any(axis=1).all(), "some cells were never filled"
     return tiles

@@ -1,0 +1,53 @@
+{
+  "ssl": {
+    "overall_acc": 0.8022222222222222,
+    "group_acc": 0.8611111111111112,
+    "per_class_acc": {
+      "AnnualCrop": 0.87,
+      "Forest": 0.94,
+      "HerbaceousVegetation": 0.7733333333333333,
+      "Highway": 0.452,
+      "Industrial": 0.916,
+      "Pasture": 0.795,
+      "PermanentCrop": 0.604,
+      "Residential": 0.96,
+      "River": 0.668,
+      "SeaLake": 0.9466666666666667
+    },
+    "feature_dim": 64
+  },
+  "random": {
+    "overall_acc": 0.6403703703703704,
+    "group_acc": 0.7548148148148148,
+    "per_class_acc": {
+      "AnnualCrop": 0.6366666666666667,
+      "Forest": 0.85,
+      "HerbaceousVegetation": 0.5333333333333333,
+      "Highway": 0.232,
+      "Industrial": 0.88,
+      "Pasture": 0.715,
+      "PermanentCrop": 0.428,
+      "Residential": 0.7933333333333333,
+      "River": 0.476,
+      "SeaLake": 0.7933333333333333
+    },
+    "feature_dim": 64
+  },
+  "color": {
+    "overall_acc": 0.6207407407407407,
+    "group_acc": 0.7203703703703703,
+    "per_class_acc": {
+      "AnnualCrop": 0.76,
+      "Forest": 0.71,
+      "HerbaceousVegetation": 0.5866666666666667,
+      "Highway": 0.228,
+      "Industrial": 0.848,
+      "Pasture": 0.575,
+      "PermanentCrop": 0.384,
+      "Residential": 0.8333333333333334,
+      "River": 0.624,
+      "SeaLake": 0.5766666666666667
+    },
+    "feature_dim": 6
+  }
+}
